@@ -19,7 +19,7 @@ import errno
 # 4. Create Thumbnail for serving image in the future
 # 5. Save Thumbnail to different location
 
-simple_page = Blueprint('simple_page', __name__, template_folder='templates')
+upload_page = Blueprint('simple_page', __name__, template_folder='templates')
 ACCEPTED_FILES = {'png', 'jpeg', 'jpg', 'NEF'}
 
 
@@ -30,14 +30,14 @@ def is_accepted_file(file_name):
         return False
 
 
-@simple_page.route('/show')
+@upload_page.route('/show')
 def route_healtcheck():
     resp = Response(json.dumps({"Status": "Healthy"}))
     resp.headers['Content-Type'] = "application/json"
     return resp
 
 
-@simple_page.route('/', methods=['POST'])
+@upload_page.route('/', methods=['POST'])
 def upload_image():
     file = request.files['file']
     if not is_accepted_file(file.filename):
@@ -64,13 +64,12 @@ def process_file(file, config: Dict):
     image = create_image_object(file, config)
     db.session.add(image)
 
-
     try:
-        os.makedirs(os.path.dirname(image.save_path))
+        os.makedirs(os.path.dirname(image.original_path))
     except OSError as exc: # Guard against race condition
         if exc.errno != errno.EEXIST:
             raise
-    image.file.save(image.save_path)
+    image.file.save(image.original_path)
     db.session.commit()
 
 
@@ -121,13 +120,16 @@ def create_image_object(file, config) -> Image:
                                           file_name=filename,
                                           config=config,
                                           dir_appendage="original")
+    # fullsize_viewable_path = original_path.replace("/original/", "/viewable/")
+    # fullsize_viewable_path = ".".join(fullsize_viewable_path.rsplit(".", 1)[:-1]) + ".jpg"
 
-    thumbnail_path = original_path.replace("/original/", "/thumbnail/")
     return Image(
-        file=file,
+        image=file,
         file_name=filename,
         tags=tags,
         date=date_taken,
-        save_path=original_path,
-        thumb_nail_path=thumbnail_path)
+        save_path=original_path
+    )
+
+
 

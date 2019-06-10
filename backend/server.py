@@ -1,9 +1,13 @@
-from flask import Flask, request, jsonify, send_from_directory, Response
+from flask import Flask, Response
 import json
-from upload_controller import simple_page
+from controllers.upload_controller import upload_page
+from controllers.image_controller import image_page
+
 from members import db
 app = Flask(__name__)
-app.register_blueprint(simple_page, url_prefix="/upload")
+app.register_blueprint(upload_page, url_prefix="/upload")
+app.register_blueprint(image_page, url_prefix="/images")
+
 
 
 @app.route('/healthcheck', methods=["GET"])
