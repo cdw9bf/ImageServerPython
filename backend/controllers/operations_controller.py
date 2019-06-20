@@ -25,4 +25,8 @@ def get_list_of_missing_thumbnails():
 
 @operations_page.route('/thumbnails/generate', methods=['POST'])
 def generate_thumb_nail():
-    pass
+    data = request.json()
+    print(data)
+    resp = Response()
+    resp.status_code = 204
+    return resp
