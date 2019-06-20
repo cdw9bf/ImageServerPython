@@ -19,7 +19,7 @@ import errno
 # 4. Create Thumbnail for serving image in the future
 # 5. Save Thumbnail to different location
 
-upload_page = Blueprint('simple_page', __name__, template_folder='templates')
+upload_page = Blueprint('upload_page', __name__, template_folder='templates')
 ACCEPTED_FILES = {'png', 'jpeg', 'jpg', 'NEF'}
 
 
@@ -30,9 +30,10 @@ def is_accepted_file(file_name):
         return False
 
 
-@upload_page.route('/show')
+@upload_page.route('/thumbnails', methods=['GET'])
 def route_healtcheck():
-    resp = Response(json.dumps({"Status": "Healthy"}))
+    need_thumbnails = Image.query.filter_by(thumb_nail_path=None).all()
+    resp = Response([str(i) for i in need_thumbnails])
     resp.headers['Content-Type'] = "application/json"
     return resp
 
@@ -125,7 +126,6 @@ def create_image_object(file, config) -> Image:
 
     return Image(
         image=file,
-        file_name=filename,
         tags=tags,
         date=date_taken,
         save_path=original_path

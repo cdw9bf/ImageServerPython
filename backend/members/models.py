@@ -1,5 +1,6 @@
 from . import db
 import uuid
+import json
 from werkzeug.datastructures import FileStorage
 from sqlalchemy.dialects.postgresql import UUID
 from typing import Dict
@@ -13,15 +14,24 @@ class Image(db.Model):
     original_path = db.Column(db.String(240), nullable=False)
     fullsize_viewable_path = db.Column(db.String(240))
     thumb_nail_path = db.Column(db.String(240))
+    image_type = db.Column(db.String(10))
 
-    def __init__(self, image: FileStorage, file_name: str, tags: Dict, date: datetime, save_path: str, fullsize_viewable_path: str=None, thumb_nail_path: str = None, id=None):
+    def __init__(self, image: FileStorage, tags: Dict, date: datetime, save_path: str, fullsize_viewable_path: str=None, thumb_nail_path: str = None, id=None):
         self.id = id if id is not None else uuid.uuid4()
         self.file = image
-        self.file_name = file_name
         self.tags = tags
         self.date = date
         self.original_path = save_path
         self.thumb_nail_path = thumb_nail_path
         self.fullsize_viewable_path = fullsize_viewable_path
-        self.img_type = save_path.rsplit(".", 1)[-1]
+        self.image_type = save_path.rsplit(".", 1)[-1]
+
+    def __repr__(self):
+        print(self.__dict__)
+        d = {
+            "id": str(self.id),
+            "date": str(self.date),
+            "img_type": self.image_type
+        }
+        return json.dumps(d)
 
