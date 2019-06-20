@@ -16,8 +16,6 @@ import errno
 # 1. Upload full size image
 # 2. Save Image to disk
 # 3. Create Entries in DB
-# 4. Create Thumbnail for serving image in the future
-# 5. Save Thumbnail to different location
 
 upload_page = Blueprint('upload_page', __name__, template_folder='templates')
 ACCEPTED_FILES = {'png', 'jpeg', 'jpg', 'NEF'}
@@ -28,14 +26,6 @@ def is_accepted_file(file_name):
         return True
     else:
         return False
-
-
-@upload_page.route('/thumbnails', methods=['GET'])
-def route_healtcheck():
-    need_thumbnails = Image.query.filter_by(thumb_nail_path=None).all()
-    resp = Response([str(i) for i in need_thumbnails])
-    resp.headers['Content-Type'] = "application/json"
-    return resp
 
 
 @upload_page.route('/', methods=['POST'])

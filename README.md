@@ -23,7 +23,7 @@ Example:
 /upload
     / : POST (uploads image)
 /operations
-    /thumbnails
+    /thumbnails    : GET (gets list of thumbnails)
         /missing   : GET
         /generate  : POST
     /full-size

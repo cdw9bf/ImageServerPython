@@ -2,11 +2,15 @@ from flask import Flask, Response
 import json
 from controllers.upload_controller import upload_page
 from controllers.image_controller import image_page
+from controllers.operations_controller import operations_page
+
 
 from members import db
 app = Flask(__name__)
 app.register_blueprint(upload_page, url_prefix="/upload")
 app.register_blueprint(image_page, url_prefix="/images")
+app.register_blueprint(operations_page, url_prefix="/operations")
+
 
 
 
