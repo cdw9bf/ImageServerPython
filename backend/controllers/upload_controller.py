@@ -86,6 +86,7 @@ def create_file_save_path(date: datetime, file_name, config, dir_appendage) -> A
     if os.path.exists(full_path):
         i = 0
         name_split = file_name.rsplit(".", 1)
+        # Todo: Remove this race condition if two images are uploaded at the same time with the same name
         while os.path.exists(full_path):
             new_name = name_split[0:-1] + ["{0}".format(i)] + name_split[-1::]
             new_name = ".".join(new_name)

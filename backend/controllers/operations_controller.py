@@ -8,9 +8,8 @@ operations_page = Blueprint('operations_page', __name__, template_folder='templa
 
 @operations_page.route('/thumbnails', methods=['GET'])
 def get_list_of_thumbnails():
-    # TODO: Make filter happen on DB Call
-    has_thumbnails = Image.query.all()
-    resp = Response([str(i) for i in has_thumbnails if i.thumb_nail_path is not None])
+    has_thumbnails = Image.query.filter(Image.thumb_nail_path.isnot(None)).all()
+    resp = Response([str(i) for i in has_thumbnails])
     resp.headers['Content-Type'] = "application/json"
     return resp
 
@@ -25,8 +24,6 @@ def get_list_of_missing_thumbnails():
 
 @operations_page.route('/thumbnails/generate', methods=['POST'])
 def generate_thumb_nail():
-    data = request.json()
-    print(data)
-    resp = Response()
-    resp.status_code = 204
-    return resp
+    print(request.get_json())
+
+    return "", 204
