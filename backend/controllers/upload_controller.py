@@ -1,5 +1,8 @@
 from flask import Blueprint, Response, request
 from flask import current_app as app
+
+from werkzeug.datastructures import FileStorage
+
 from typing import Dict, AnyStr
 from datetime import datetime
 from members.models import Image
@@ -40,18 +43,17 @@ def upload_image():
         resp.headers['Content-Type'] = "application/json"
         return resp
 
-    process_file(file, app.config)
+    image = process_file(file, app.config)
 
-    resp = Response(json.dumps({"Status": "Success"}))
+    resp = Response(str(image))
     resp.headers['Content-Type'] = "application/json"
     return resp
 
 
-def process_file(file, config: Dict):
+def process_file(file, config: Dict) -> Image:
     # Grab metadata
     # Insert into DB
     # Save to path (by???)
-    # Create jpg thumbnail
     image = create_image_object(file, config)
     db.session.add(image)
 
@@ -60,21 +62,28 @@ def process_file(file, config: Dict):
     except OSError as exc: # Guard against race condition
         if exc.errno != errno.EEXIST:
             raise
-    image.file.save(image.original_path)
+    file.save(image.original_path)
     db.session.commit()
+    return image
 
 
-def read_image_metadata(file) -> Dict[AnyStr, AnyStr]:
+def read_image_metadata(file: FileStorage) -> Dict[AnyStr, AnyStr]:
     tags = {}
     extension = file.filename.split(".")[-1]
     if extension in ['jpg', 'jpeg']:
         exif_format = exifread.process_file(file)
         # Format the dict to be String - String mapping
         for key in exif_format.__iter__():
-            # print(exif_format[key])
             if type(exif_format[key]) == bytes:
                 continue
-            tags[key] = exif_format[key].values
+
+            # if it's in the exifread.utils.Ratio format make it into a string
+            if type(exif_format[key].values) == list \
+                    and len(exif_format[key].values) > 0 \
+                    and type(exif_format[key].values[0]) == exifread.utils.Ratio:
+                tags[key] = [i.__repr__() for i in exif_format[key].values]
+            else:
+                tags[key] = exif_format[key].values
     else:
         raise ValueError("Extension {0} is not yet implemented".format(extension))
     return tags
@@ -95,7 +104,7 @@ def create_file_save_path(date: datetime, file_name, config, dir_appendage) -> A
     return full_path
 
 
-def extract_date_taken(tags):
+def extract_date_taken(tags) -> datetime:
     # TODO: Look at better ways of getting datetime, could be fragile
     if 'Image DateTime' in tags:
         return datetime.strptime(tags['Image DateTime'], "%Y:%m:%d %H:%M:%S")
@@ -103,7 +112,7 @@ def extract_date_taken(tags):
         raise ValueError("'Image DateTime' not in Tags dictionary!")
 
 
-def create_image_object(file, config) -> Image:
+def create_image_object(file: FileStorage, config) -> Image:
     filename = secure_filename(file.filename)
 
     tags = read_image_metadata(file)
@@ -116,7 +125,6 @@ def create_image_object(file, config) -> Image:
     # fullsize_viewable_path = ".".join(fullsize_viewable_path.rsplit(".", 1)[:-1]) + ".jpg"
 
     return Image(
-        image=file,
         tags=tags,
         date=date_taken,
         save_path=original_path

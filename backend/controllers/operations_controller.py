@@ -2,7 +2,6 @@ from flask import Blueprint, Response, request
 from flask import current_app as app
 from members.models import Image
 from members.inboud import GenerateThumbnailRequest
-from members import db
 
 operations_page = Blueprint('operations_page', __name__, template_folder='templates')
 
@@ -29,6 +28,7 @@ def generate_thumb_nail():
     #
     thumbnail_request = GenerateThumbnailRequest()
     thumbnail_request.from_json(input_json=request.get_json())
-
+    image = Image.query.filter(Image.id == thumbnail_request.id).first_or_404()
+    print(image.file)
     return "", 204
 

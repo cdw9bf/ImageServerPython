@@ -6,6 +6,8 @@ import errno
 
 
 def create_thumbnail(image: Image):
+    if image.file is None:
+        pass
     npimg = np.fromfile(image.file.stream, np.uint8)
     #
     print(npimg)

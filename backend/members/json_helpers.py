@@ -15,7 +15,28 @@ class DataFormatMisMatch(ValueError):
     def to_dict(self):
         rv = dict()
         rv['message'] = self.message
-        rv['code'] = 400
+        rv['code'] = self.status_code
+        return rv
+
+
+class InvalidInputJson(ValueError):
+    status_code = 400
+
+    def __init__(self, message, status_code=None):
+        """
+        Helper Exception for returning proper error code to response.
+        :param message: error message
+        :param status_code: HTTP status code
+        """
+        ValueError.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+
+    def to_dict(self):
+        rv = dict()
+        rv['message'] = self.message
+        rv['code'] = self.status_code
         return rv
 
 
@@ -32,6 +53,8 @@ class JsonRequest(object):
             if type(value) == dict:
                 self.from_json(input_json, model=model[key])
             else:
+                if key not in input_json:
+                    raise InvalidInputJson("Key {k} not in input json".format(k=key))
                 self.__dict__[key] = input_json[key]
 
     def to_json(self, model=None):

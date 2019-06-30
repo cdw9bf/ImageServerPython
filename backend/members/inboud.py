@@ -6,8 +6,8 @@ class GenerateThumbnailRequest(JsonRequest):
     Thumbnail Data Class
     """
     MODEL = {
-        "ids": list,
+        "id": str,
     }
 
-    def __init__(self, ids=None):
-        self.ids = ids
+    def __init__(self, id=None):
+        self.id = id
