@@ -27,11 +27,8 @@ def get_list_of_missing_thumbnails():
 def generate_thumb_nail():
     # Model
     #
-    #
     thumbnail_request = GenerateThumbnailRequest()
-    thumbnail_request.from_json(request.get_json())
-    print(thumbnail_request.ids)
-    print(request.get_json())
+    thumbnail_request.from_json(input_json=request.get_json())
 
     return "", 204
 
