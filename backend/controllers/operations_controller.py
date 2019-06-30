@@ -1,6 +1,7 @@
 from flask import Blueprint, Response, request
 from flask import current_app as app
 from members.models import Image
+from members.inboud import GenerateThumbnailRequest
 from members import db
 
 operations_page = Blueprint('operations_page', __name__, template_folder='templates')
@@ -16,7 +17,7 @@ def get_list_of_thumbnails():
 
 @operations_page.route('/thumbnails/missing', methods=['GET'])
 def get_list_of_missing_thumbnails():
-    needs_thumbnails = Image.query.filter(thumb_nail_path=None).all()
+    needs_thumbnails = Image.query.filter(Image.thumb_nail_path.is_(None)).all()
     resp = Response([str(i) for i in needs_thumbnails])
     resp.headers['Content-Type'] = "application/json"
     return resp
@@ -24,6 +25,13 @@ def get_list_of_missing_thumbnails():
 
 @operations_page.route('/thumbnails/generate', methods=['POST'])
 def generate_thumb_nail():
+    # Model
+    #
+    #
+    thumbnail_request = GenerateThumbnailRequest()
+    thumbnail_request.from_json(request.get_json())
+    print(thumbnail_request.ids)
     print(request.get_json())
 
     return "", 204
+
