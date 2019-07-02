@@ -2,7 +2,8 @@ from flask import Blueprint, Response, request
 from flask import current_app as app
 
 from werkzeug.datastructures import FileStorage
-
+import io
+import shutil
 from typing import Dict, AnyStr
 from datetime import datetime
 from members.models import Image
@@ -50,11 +51,11 @@ def upload_image():
     return resp
 
 
-def process_file(file, config: Dict) -> Image:
+def process_file(file: FileStorage, config: Dict) -> Image:
     # Grab metadata
     # Insert into DB
-    # Save to path (by???)
-    image = create_image_object(file, config)
+    # Save to path
+    image = create_image_object(byte_stream=file.stream, file_name=file.filename, config=config)
     db.session.add(image)
 
     try:
@@ -62,16 +63,16 @@ def process_file(file, config: Dict) -> Image:
     except OSError as exc: # Guard against race condition
         if exc.errno != errno.EEXIST:
             raise
+
     file.save(image.original_path)
     db.session.commit()
     return image
 
 
-def read_image_metadata(file: FileStorage) -> Dict[AnyStr, AnyStr]:
+def read_image_metadata(bytes_io: io.BytesIO, extension: AnyStr) -> Dict[AnyStr, AnyStr]:
     tags = {}
-    extension = file.filename.split(".")[-1]
     if extension in ['jpg', 'jpeg']:
-        exif_format = exifread.process_file(file)
+        exif_format = exifread.process_file(bytes_io)
         # Format the dict to be String - String mapping
         for key in exif_format.__iter__():
             if type(exif_format[key]) == bytes:
@@ -86,6 +87,8 @@ def read_image_metadata(file: FileStorage) -> Dict[AnyStr, AnyStr]:
                 tags[key] = exif_format[key].values
     else:
         raise ValueError("Extension {0} is not yet implemented".format(extension))
+    # Reset to beginning of bytestream for future consumption
+    bytes_io.seek(0)
     return tags
 
 
@@ -109,20 +112,19 @@ def extract_date_taken(tags) -> datetime:
     if 'Image DateTime' in tags:
         return datetime.strptime(tags['Image DateTime'], "%Y:%m:%d %H:%M:%S")
     else:
-        raise ValueError("'Image DateTime' not in Tags dictionary!")
+        return datetime.now()
+        # raise ValueError("'Image DateTime' not in Tags dictionary!")
 
 
-def create_image_object(file: FileStorage, config) -> Image:
-    filename = secure_filename(file.filename)
+def create_image_object(byte_stream, file_name: AnyStr, config) -> Image:
+    file_name = secure_filename(file_name)
 
-    tags = read_image_metadata(file)
+    tags = read_image_metadata(byte_stream, extension=file_name.split(".")[-1])
     date_taken = extract_date_taken(tags)
     original_path = create_file_save_path(date=date_taken,
-                                          file_name=filename,
+                                          file_name=file_name,
                                           config=config,
                                           dir_appendage="original")
-    # fullsize_viewable_path = original_path.replace("/original/", "/viewable/")
-    # fullsize_viewable_path = ".".join(fullsize_viewable_path.rsplit(".", 1)[:-1]) + ".jpg"
 
     return Image(
         tags=tags,

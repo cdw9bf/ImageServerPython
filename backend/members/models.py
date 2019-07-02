@@ -15,7 +15,7 @@ class Image(db.Model):
     fullsize_viewable_path = db.Column(db.String(240), nullable=True)
     thumb_nail_path = db.Column(db.String(240), nullable=True)
     tags = db.Column(JSON, nullable=True)
-    image_type = db.Column(db.String(10))
+    image_type = db.Column(db.String(10), nullable=False)
 
     def __init__(self, date: datetime, save_path: str, tags: Dict=None, fullsize_viewable_path: str=None, thumb_nail_path: str = None, id=None):
         self.id = id if id is not None else uuid.uuid4()
@@ -27,7 +27,6 @@ class Image(db.Model):
         self.image_type = save_path.rsplit(".", 1)[-1]
 
     def __repr__(self):
-        print(self.__dict__)
         d = {
             "id": str(self.id),
             "date": str(self.date),
@@ -35,3 +34,10 @@ class Image(db.Model):
         }
         return json.dumps(d)
 
+    def to_json(self):
+        return {
+            "name": self.original_path.split("/")[-1],
+            "id": str(self.id),
+            "date": str(self.date),
+            "img_type": self.image_type
+        }
