@@ -31,7 +31,8 @@ class Image(db.Model):
     def __repr__(self):
         d = {
             "id": str(self.id),
-            "date": str(self.date),
+            "date_taken": str(self.date_taken),
+            "date_uploaded": str(self.date_uploaded),
             "img_type": self.image_type
         }
         return json.dumps(d)
@@ -40,7 +41,8 @@ class Image(db.Model):
         return {
             "name": self.original_path.split("/")[-1],
             "id": str(self.id),
-            "date": str(self.date),
+            "date_taken": self.date_taken,
+            "date_uploaded": self.date_uploaded,
             "tags": self.tags,
             "img_type": self.image_type
         }

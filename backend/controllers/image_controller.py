@@ -26,12 +26,17 @@ def get_full_size_image(img_id):
     return resp
 
 
+@image_page.route('/<img_id>/original', methods=['GET'])
+def get_full_size_image(img_id):
+    image = Image.query.filter(Image.id == img_id).first_or_404()
+    resp = Response(open(image.original_path, "rb"))
+    resp.headers.set('Content-Type', 'image/{0}'.format(image.image_type.lower()))
+    return resp
+
+
 @image_page.route('/<img_id>/metadata', methods=['GET'])
 def get_image_metadata(img_id):
     image = Image.query.filter(Image.id == img_id).first_or_404()
-    if image.fullsize_viewable_path is None:
-        return "No Full Size Path", 400
     resp = Response(json.dumps(image.to_json(), cls=DateTimeEncoder))
     resp.headers.set('Content-Type', 'application/json')
     return resp
-

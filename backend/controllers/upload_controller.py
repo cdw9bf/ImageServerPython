@@ -3,7 +3,6 @@ from flask import current_app as app
 
 from werkzeug.datastructures import FileStorage
 import io
-import shutil
 from typing import Dict, AnyStr
 from datetime import datetime
 from members.models import Image
@@ -15,18 +14,12 @@ from werkzeug.utils import secure_filename
 import errno
 
 
-# What do I want to do?
-#
-# 1. Upload full size image
-# 2. Save Image to disk
-# 3. Create Entries in DB
-
 upload_page = Blueprint('upload_page', __name__, template_folder='templates')
-ACCEPTED_FILES = {'png', 'jpeg', 'jpg', 'NEF'}
+ACCEPTED_FILES = {'png', 'jpeg', 'jpg', 'nef'}
 
 
 def is_accepted_file(file_name):
-    if file_name.split(".")[-1] in ACCEPTED_FILES:
+    if file_name.split(".")[-1].lower() in ACCEPTED_FILES:
         return True
     else:
         return False
