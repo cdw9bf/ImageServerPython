@@ -7,9 +7,9 @@ from members import db
 from members.json_helpers import DataFormatMisMatch, InvalidInputJson
 
 app = Flask(__name__)
-app.register_blueprint(upload_page, url_prefix="/upload")
-app.register_blueprint(image_page, url_prefix="/images")
-app.register_blueprint(operations_page, url_prefix="/operations")
+app.register_blueprint(upload_page, url_prefix="/v1/upload")
+app.register_blueprint(image_page, url_prefix="/v1/images")
+app.register_blueprint(operations_page, url_prefix="/v1/operations")
 
 
 @app.route('/healthcheck', methods=["GET"])
