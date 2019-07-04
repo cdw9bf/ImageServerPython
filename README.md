@@ -20,20 +20,23 @@ Example:
 ### Current API Design
 
 ```
-/upload
-    / : POST (uploads image)
-/operations
-    /thumbnails    : GET (gets list of thumbnails)
-        /missing   : GET
-        /generate  : POST
-    /full-size
-        /missing   : GET
-        /generate  : POST
-/images
-    /{id}
-        /original  : GET, DELETE
-        /full-size : GET, DELETE
-        /thumbnail : GET, DELETE
+/v1
+    /upload
+        / : POST (uploads image)
+    /operations
+        /thumbnails    : GET (gets list of thumbnails)
+            /missing   : GET
+            /generate  : POST
+        /full-size     : GET (gets list of full-size images)
+            /missing   : GET
+            /generate  : POST
+    /images            : GET - returns IDs of images matching search criteria
+        /{id}
+            /original  : GET, DELETE
+            /full-size : GET, DELETE
+            /thumbnail : GET, DELETE
+            /metadata  : GET
+        
 ```
 
 ## Sample commands 

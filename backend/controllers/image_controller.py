@@ -1,4 +1,4 @@
-from flask import Blueprint, Response
+from flask import Blueprint, Response, request
 from members.models import Image
 from utils.json_helpers import DateTimeEncoder
 import json
@@ -40,3 +40,9 @@ def get_image_metadata(img_id):
     resp = Response(json.dumps(image.to_json(), cls=DateTimeEncoder))
     resp.headers.set('Content-Type', 'application/json')
     return resp
+
+
+@image_page.route('/', methods=['GET'])
+def get_images():
+    print(request.args.get('date-time'))
+    return 200
