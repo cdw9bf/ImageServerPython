@@ -33,7 +33,7 @@ def generate_thumb_nail():
     thumbnail_request = GenerateThumbnailRequest()
     thumbnail_request.from_json(input_json=request.get_json())
     image = Image.query.filter(Image.id == thumbnail_request.id).first_or_404()
-    image.thumb_nail_path = image.original_path.replace("/original/", "/thumbnail/")
+    image.thumb_nail_path = image.original_path.replace("/original/", "/thumbnail/").replace(".{ext}".format(ext=image.image_type), ".jpg")
     create_thumbnail(image, image.thumb_nail_path)
     db.session.commit()
     return "", 204
@@ -60,7 +60,7 @@ def generate_full_size():
     fullsize_request = GenerateFullSizeRequest()
     fullsize_request.from_json(input_json=request.get_json())
     image = Image.query.filter(Image.id == fullsize_request.id).first_or_404()
-    image.fullsize_viewable_path = image.original_path.replace("/original/", "/full_size/")
+    image.fullsize_viewable_path = image.original_path.replace("/original/", "/full_size/").replace(".{ext}".format(ext=image.image_type), ".jpg")
     create_fullsize(image, image.fullsize_viewable_path)
     db.session.commit()
     return "", 204

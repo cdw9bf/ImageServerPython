@@ -34,6 +34,10 @@ def is_accepted_file(file_name):
 
 @upload_page.route('/', methods=['POST'])
 def upload_image():
+    """
+    Upload Image method. Takes image stream as a form parameter of the request, saves it, and creates an entry in the DB
+    :return: Created Image Object
+    """
     file = request.files['file']
     if not is_accepted_file(file.filename):
         resp = Response(
@@ -52,6 +56,12 @@ def upload_image():
 
 
 def process_file(file: FileStorage, config: Dict) -> Image:
+    """
+    Takes byte stream, creates image object, saves file to location and commits entry to db
+    :param file: FileStorage object from Request
+    :param config: Configuration Dictionary from main app
+    :return: Created Image Object
+    """
     # Grab metadata
     # Insert into DB
     # Save to path
@@ -70,12 +80,27 @@ def process_file(file: FileStorage, config: Dict) -> Image:
 
 
 def read_image_metadata(bytes_io: io.BytesIO, extension: AnyStr) -> Dict[AnyStr, AnyStr]:
+    """
+    Main image metadata processing. Reads EXIFs information then returns it in a dictionary format.
+    Strips out fields that are not needed / full of junk that's not meaningful.
+    :param bytes_io: BytesIo object of image
+    :param extension: type of file being processed
+    :return: Dictionary of Tags
+    """
     tags = {}
-    if extension in ['jpg', 'jpeg']:
+    if extension.lower() in ['jpg', 'jpeg', 'nef']:
         exif_format = exifread.process_file(bytes_io)
         # Format the dict to be String - String mapping
         for key in exif_format.__iter__():
             if type(exif_format[key]) == bytes:
+                continue
+
+            # Filter out lots of Nikon Specific tags that don't mean anything
+            if key.startswith("MakerNote") and key not in ["MakerNote Quality", "MakerNote FocusMode", "MakerNote TotalShutterReleases"]:
+                continue
+
+            # Filter out some exif tags
+            if key == "EXIF MakerNote":
                 continue
 
             # if it's in the exifread.utils.Ratio format make it into a string
@@ -93,6 +118,14 @@ def read_image_metadata(bytes_io: io.BytesIO, extension: AnyStr) -> Dict[AnyStr,
 
 
 def create_file_save_path(date: datetime, file_name, config, dir_appendage) -> AnyStr:
+    """
+    Creates the path to save the image on the system.
+    :param date: Date that the image was taken
+    :param file_name: Name of the Image File
+    :param config: App config that contains the UPLOAD_FOLDER field
+    :param dir_appendage: type of file that's being saved
+    :return: Full path to save image at. Should be unique barring a race condition
+    """
     path = "{y}/{m}/{d}/".format(y=date.year, m=date.month, d=date.day)
     full_path = os.path.join(config['UPLOAD_FOLDER'], dir_appendage, path + file_name)
     if os.path.exists(full_path):
@@ -108,15 +141,27 @@ def create_file_save_path(date: datetime, file_name, config, dir_appendage) -> A
 
 
 def extract_date_taken(tags) -> datetime:
+    """
+    Extracts the date the photo was taken from the image. If none found, it defaults to 2000
+    :param tags: Dictionary of Image Tags
+    :return: Datetime object
+    """
     # TODO: Look at better ways of getting datetime, could be fragile
     if 'Image DateTime' in tags:
         return datetime.strptime(tags['Image DateTime'], "%Y:%m:%d %H:%M:%S")
     else:
-        return datetime.now()
-        # raise ValueError("'Image DateTime' not in Tags dictionary!")
+        print("No Datetime Found!")
+        return datetime.strptime("2000:01:01 00:00:00", "%Y:%m:%d %H:%M:%S")
 
 
 def create_image_object(byte_stream, file_name: AnyStr, config) -> Image:
+    """
+    Creates the Image Database Object
+    :param byte_stream: Input bytesteam of image
+    :param file_name: Name of Image file Uploaded
+    :param config: App config
+    :return: New Image Object for uploaded image
+    """
     file_name = secure_filename(file_name)
 
     tags = read_image_metadata(byte_stream, extension=file_name.split(".")[-1])
@@ -128,7 +173,8 @@ def create_image_object(byte_stream, file_name: AnyStr, config) -> Image:
 
     return Image(
         tags=tags,
-        date=date_taken,
+        date_uploaded=datetime.now(),
+        date_taken=date_taken,
         save_path=original_path
     )
 

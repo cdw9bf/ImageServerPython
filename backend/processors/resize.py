@@ -3,6 +3,7 @@ import cv2
 from typing import AnyStr
 import os
 import errno
+import rawpy
 
 
 def create_fullsize(image: Image, dst: AnyStr):
@@ -55,8 +56,12 @@ def load_img(path: AnyStr, img_type: AnyStr):
     :param img_type: extension of file
     :return: numpy array of image
     """
-    if img_type in ['jpeg', 'jpg']:
+    if img_type.lower() in ['jpeg', 'jpg']:
         return cv2.imread(path)
+    elif img_type.lower() in ['nef']:
+        with rawpy.imread(path) as raw:
+            rgb = raw.postprocess()
+        return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     else:
         raise ValueError("Not yet Implemented")
 
