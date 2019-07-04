@@ -18,7 +18,7 @@ class Image(db.Model):
     tags = db.Column(JSON, nullable=True)
     image_type = db.Column(db.String(10), nullable=False)
 
-    def __init__(self, date_uploaded: datetime, ,save_path: str, date_taken: datetime=None,tags: Dict=None, fullsize_viewable_path: str=None, thumb_nail_path: str = None, id=None):
+    def __init__(self, date_uploaded: datetime, save_path: str, date_taken: datetime=None,tags: Dict=None, fullsize_viewable_path: str=None, thumb_nail_path: str = None, id=None):
         self.id = id if id is not None else uuid.uuid4()
         self.date_uploaded = date_uploaded
         self.date_taken = date_taken
