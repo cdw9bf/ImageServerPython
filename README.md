@@ -39,6 +39,29 @@ Example:
         
 ```
 
+### Database Design 
+    
+The current design is to include all of the entries in a single table. There is not a need at the moment to expand to multiple tables. Once de-duplication is added, there may be a more structured database schema. 
+
+The current design is splitting the information between two tables. The first table contains the image metadata about the 
+
+
+| id               | date_taken | date_added         | tags |
+| :--------------: | :--------: | :----------------: | :--: |   
+| UUID PRIMARY KEY | TIMESTAMP  | TIMESTAMP NOT NULL | JSON |
+
+
+| id               | path          | format        | image_type    | date_uploaded      |
+| :--------------: | :-----------: | :-----------: | :-----------: | :----------------: |
+| UUID PRIMARY KEY | TEXT NOT NULL | TEXT NOT NULL | TEXT NOT NULL | TIMESTAMP NOT NULL |
+
+
+
+### File Save path
+
+The files are saved under a date partitioned naming structure based off of the date they were taken. If there is not a date taken, then it is defaulted to 2000/01/01. 
+The leading folder is the type of image (full size, original, thumbnail etc) then the following directories are 
+
 ## Sample commands 
 For upload a new image: 
 ```bash
