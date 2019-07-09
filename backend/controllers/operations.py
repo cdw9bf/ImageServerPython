@@ -1,6 +1,6 @@
 from flask import Blueprint, Response, request
 from flask import current_app as app
-from utils.json_helpers import DateTimeEncoder
+from utils.encoder import DateTimeEncoder
 from members.models import Image, db
 from members.inboud import GenerateThumbnailRequest, GenerateFullSizeRequest
 from processors.resize import create_thumbnail, create_fullsize

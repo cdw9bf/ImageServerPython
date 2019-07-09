@@ -1,8 +1,8 @@
 from flask import Flask, Response
 import json
-from controllers.upload_controller import upload_page
-from controllers.image_controller import image_page
-from controllers.operations_controller import operations_page
+from controllers.upload import upload_page
+from controllers.image import image_page
+from controllers.operations import operations_page
 from members import db
 from members.json_helpers import DataFormatMisMatch, InvalidInputJson
 
