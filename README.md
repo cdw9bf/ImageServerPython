@@ -46,14 +46,14 @@ The current design is to include all of the entries in a single table. There is 
 The current design is splitting the information between two tables. The first table contains the image metadata about the 
 
 
-| id               | date_taken | date_added         | tags |
-| :--------------: | :--------: | :----------------: | :--: |   
+| uuid             | date_taken | date_added         | tags |
+| :--------------: | :--------: | :----------------: | :--: |
 | UUID PRIMARY KEY | TIMESTAMP  | TIMESTAMP NOT NULL | JSON |
 
 
-| id               | path          | format        | image_type    | date_uploaded      |
-| :--------------: | :-----------: | :-----------: | :-----------: | :----------------: |
-| UUID PRIMARY KEY | TEXT NOT NULL | TEXT NOT NULL | TEXT NOT NULL | TIMESTAMP NOT NULL |
+| uuid             | path          | image_format  | size             | date_uploaded      |
+| :--------------: | :-----------: | :-----------: | :--------------: | :----------------: |
+| UUID PRIMARY KEY | TEXT NOT NULL | TEXT NOT NULL | TEXT PRIMARY KEY | TIMESTAMP NOT NULL |
 
 
 

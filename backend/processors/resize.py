@@ -13,7 +13,7 @@ def create_fullsize(image: Image, dst: AnyStr):
     :param dst: Destination path
     :return: None
     """
-    img_arr = load_img(image.original_path, image.image_type)
+    img_arr = load_img(image.path, image.image_format)
     ratio = img_arr.shape[0:2][::-1]
     resized = cv2.resize(src=img_arr, dsize=ratio, interpolation=cv2.INTER_AREA)
     save_image(image=resized, destination=dst)
@@ -27,7 +27,7 @@ def create_thumbnail(image: Image, dst: AnyStr, size: int=300):
     :param size: Horizontal size in px
     :return: None
     """
-    img_arr = load_img(image.original_path, image.image_type)
+    img_arr = load_img(image.path, image.image_format)
     ratio = img_arr.shape[0:2][::-1]
 
     # Height will be 300 for now
